@@ -1,102 +1,111 @@
-const express = require('express');
-const authMiddleware = require('../middlewares/auth');
+const express = require("express");
+const authMiddleware = require("../middlewares/auth");
 
-const Project = require('../models/Project');
-const Task = require('../models/Task');
+const Project = require("../models/Project");
+const Task = require("../models/Task");
 
 const router = express.Router();
 
 router.use(authMiddleware);
 
 // LIST
-router.get('/', async (req, res) => {
-    try {
-        const projects = await Project.find().populate(['user', 'tasks']);
+router.get("/", async (req, res) => {
+  try {
+    const projects = await Project.find().populate(["user", "tasks"]);
 
-        return res.send({ projects });
-
-    } catch (err) {
-        return res.status(400).send({ error: 'Error loading projects' });
-    }
+    return res.send({ projects });
+  } catch (err) {
+    return res.status(400).send({ error: "Error loading projects" });
+  }
 });
 
 // LIST BY ID
-router.get('/:projectId', async (req, res) => {
-    try {
-        const project = await Project.findById(req.params.projectId).populate(['user', 'tasks']);
+router.get("/:projectId", async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.projectId).populate([
+      "user",
+      "tasks"
+    ]);
 
-        return res.send({ project });
-
-    } catch (err) {
-        return res.status(400).send({ error: 'Error loading project' });
-    }
+    return res.send({ project });
+  } catch (err) {
+    return res.status(400).send({ error: "Error loading project" });
+  }
 });
 
 // CREATE
-router.post('/', async (req, res) => {
-    try {
-        const { title, description, tasks } = req.body;
+router.post("/", async (req, res) => {
+  try {
+    const { title, description, tasks } = req.body;
 
-        const project = await Project.create({ title, description, user: req.userId });
+    const project = await Project.create({
+      title,
+      description,
+      user: req.userId
+    });
 
-        await Promise.all(tasks.map(async task => {
-            const projectTask = new Task({ ...task, project: project._id });
+    await Promise.all(
+      tasks.map(async task => {
+        const projectTask = new Task({ ...task, project: project._id });
 
-            await projectTask.save();
+        await projectTask.save();
 
-            project.tasks.push(projectTask);
+        project.tasks.push(projectTask);
+      })
+    );
 
-        }));
+    await project.save();
 
-        await project.save();
-
-        return res.send({ project });
-    } catch (err) {
-        return res.status(400).send({ error: 'Error creating new project' });
-    }
+    return res.send({ project });
+  } catch (err) {
+    return res.status(400).send({ error: "Error creating new project" });
+  }
 });
 
 // UPDATE
-router.put('/:projectId', async (req, res) => {
-    try {
-        const { title, description, tasks } = req.body;
+router.put("/:projectId", async (req, res) => {
+  try {
+    const { title, description, tasks } = req.body;
 
-        const project = await Project.findByIdAndUpdate(req.params.projectId, {
-            title,
-            description
-        }, { new: true });
+    const project = await Project.findByIdAndUpdate(
+      req.params.projectId,
+      {
+        title,
+        description
+      },
+      { new: true }
+    );
 
-        project.tasks = [];
-        await Task.remove({ project: project._id });
+    project.tasks = [];
+    await Task.remove({ project: project._id });
 
-        await Promise.all(tasks.map(async task => {
-            const projectTask = new Task({ ...task, project: project._id });
+    await Promise.all(
+      tasks.map(async task => {
+        const projectTask = new Task({ ...task, project: project._id });
 
-            await projectTask.save();
+        await projectTask.save();
 
-            project.tasks.push(projectTask);
+        project.tasks.push(projectTask);
+      })
+    );
 
-        }));
+    await project.save();
 
-        await project.save();
-
-        return res.send({ project });
-    } catch (err) {
-        return res.status(400).send({ error: 'Error updating project' });
-    }
+    return res.send({ project });
+  } catch (err) {
+    return res.status(400).send({ error: "Error updating project" });
+  }
 });
 
 // REMOVE
-router.delete('/:projectId', async (req, res) => {
-    try {
-        const project = await Project.findByIdAndRemove(req.params.projectId);
+router.delete("/:projectId", async (req, res) => {
+  try {
+    const project = await Project.findByIdAndRemove(req.params.projectId);
 
-        return res.send({ project });
-
-    } catch (err) {
-        return res.status(400).send({ error: 'Error loading project' });
-    }
+    return res.send({ project });
+  } catch (err) {
+    return res.status(400).send({ error: "Error loading project" });
+  }
 });
 
-
-module.exports = app => app.use('/projects', router);
+module.exports = app => app.use("/projects", router);
