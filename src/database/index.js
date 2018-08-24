@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const uri = "mongodb://localhost:27017/api-modelo-teste";
+require('dotenv').config();
 
 mongoose.connect(
-  uri,
+  process.env.DB_URI,
   { useNewUrlParser: true }
 );
 mongoose.Promise = global.Promise;
