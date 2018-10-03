@@ -18,7 +18,7 @@ function generateToken(params = {}) {
 }
 
 // rota para registrar usuario
-router.post("/register", async (req, res) => {
+export async function signup(req, res) {
   const { email } = req.body;
 
   try {
@@ -36,10 +36,10 @@ router.post("/register", async (req, res) => {
   } catch (err) {
     return res.status(400).send({ error: "Registration failed" });
   }
-});
+}
 
 // rota para autenticar usuario
-router.post("/authenticate", async (req, res) => {
+export async function signin(req, res) {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).select("+password");
@@ -55,9 +55,9 @@ router.post("/authenticate", async (req, res) => {
     user,
     token: generateToken({ id: user.id })
   });
-});
+}
 
-router.post("/forgot_password", async (req, res) => {
+export async function forgotPassword(req, res) {
   const { email } = req.body;
 
   try {
@@ -97,9 +97,9 @@ router.post("/forgot_password", async (req, res) => {
   } catch (err) {
     res.status(400).send({ error: "Error on forgot password, try again" });
   }
-});
+}
 
-router.post("/reset_password", async (req, res) => {
+export async function resetPassword(req, res) {
   const { email, token, password } = req.body;
 
   try {
@@ -127,6 +127,6 @@ router.post("/reset_password", async (req, res) => {
   } catch (err) {
     res.status(400).send({ error: "Cannot reset password, try again" });
   }
-});
+}
 
 module.exports = app => app.use("/auth", router);
