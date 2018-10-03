@@ -18,7 +18,7 @@ function generateToken(params = {}) {
 }
 
 // rota para registrar usuario
-export async function signup(req, res) {
+exports.signup = async function(req, res) {
   const { email } = req.body;
 
   try {
@@ -36,10 +36,10 @@ export async function signup(req, res) {
   } catch (err) {
     return res.status(400).send({ error: "Registration failed" });
   }
-}
+};
 
 // rota para autenticar usuario
-export async function signin(req, res) {
+exports.signin = async function(req, res) {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).select("+password");
@@ -55,9 +55,9 @@ export async function signin(req, res) {
     user,
     token: generateToken({ id: user.id })
   });
-}
+};
 
-export async function forgotPassword(req, res) {
+exports.forgotPassword = async function(req, res) {
   const { email } = req.body;
 
   try {
@@ -97,9 +97,9 @@ export async function forgotPassword(req, res) {
   } catch (err) {
     res.status(400).send({ error: "Error on forgot password, try again" });
   }
-}
+};
 
-export async function resetPassword(req, res) {
+exports.resetPassword = async function(req, res) {
   const { email, token, password } = req.body;
 
   try {
@@ -127,6 +127,6 @@ export async function resetPassword(req, res) {
   } catch (err) {
     res.status(400).send({ error: "Cannot reset password, try again" });
   }
-}
+};
 
-module.exports = app => app.use("/auth", router);
+module.exports;
