@@ -8,8 +8,6 @@ const authConfig = require("../../config/auth");
 
 const User = require("../models/user");
 
-const router = express.Router();
-
 // função para gerar o token
 function generateToken(params = {}) {
   return jwt.sign(params, authConfig.secret, {

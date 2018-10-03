@@ -1,15 +1,9 @@
 const express = require("express");
-const authMiddleware = require("../middlewares/auth");
-
 const Project = require("../models/project");
 const Task = require("../models/task");
 
-const router = express.Router();
-
-router.use(authMiddleware);
-
 // LIST
-router.get("/", async (req, res) => {
+exports.list = async function(req, res) {
   try {
     const projects = await Project.find().populate(["user", "tasks"]);
 
@@ -17,10 +11,10 @@ router.get("/", async (req, res) => {
   } catch (err) {
     return res.status(400).send({ error: "Error loading projects" });
   }
-});
+};
 
 // LIST BY ID
-router.get("/:projectId", async (req, res) => {
+exports.listById = async function(req, res) {
   try {
     const project = await Project.findById(req.params.projectId).populate([
       "user",
@@ -31,10 +25,10 @@ router.get("/:projectId", async (req, res) => {
   } catch (err) {
     return res.status(400).send({ error: "Error loading project" });
   }
-});
+};
 
 // CREATE
-router.post("/", async (req, res) => {
+exports.create = async function(req, res) {
   try {
     const { title, description, tasks } = req.body;
 
@@ -60,10 +54,10 @@ router.post("/", async (req, res) => {
   } catch (err) {
     return res.status(400).send({ error: "Error creating new project" });
   }
-});
+};
 
 // UPDATE
-router.put("/:projectId", async (req, res) => {
+exports.update = async function(req, res) {
   try {
     const { title, description, tasks } = req.body;
 
@@ -95,10 +89,10 @@ router.put("/:projectId", async (req, res) => {
   } catch (err) {
     return res.status(400).send({ error: "Error updating project" });
   }
-});
+};
 
 // REMOVE
-router.delete("/:projectId", async (req, res) => {
+exports.delete = async function(req, res) {
   try {
     const project = await Project.findByIdAndRemove(req.params.projectId);
 
@@ -106,6 +100,4 @@ router.delete("/:projectId", async (req, res) => {
   } catch (err) {
     return res.status(400).send({ error: "Error loading project" });
   }
-});
-
-module.exports = app => app.use("/projects", router);
+};
