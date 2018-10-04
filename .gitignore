@@ -31,6 +31,7 @@ Temporary Items
 ./src/logs/*.log
 npm-debug.log*
 
+
 # Runtime data
 pids
 *.pid
@@ -68,3 +69,7 @@ jspm_packages
 
 ./node-modules
 ./.env
+./src/public
+./src/public/uploads/*
+./src/public/uploads
+./src/public/*
