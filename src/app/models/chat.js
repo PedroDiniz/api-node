@@ -1,6 +1,6 @@
 const mongoose = require("../../database");
 
-const chatSchema = new mongoose.Schema({
+const ChatSchema = new mongoose.Schema({
   users: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -10,18 +10,9 @@ const chatSchema = new mongoose.Schema({
   ],
   messages: [
     {
-      message: {
-        type: String
-      },
-      date: {
-        type: Date,
-        default: Date.now
-      },
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        require: true
-      }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      require: true
     }
   ],
   createdAt: {
@@ -36,6 +27,6 @@ const chatSchema = new mongoose.Schema({
   }
 });
 
-const Project = mongoose.model("Project", ProjectSchema);
+const Chat = mongoose.model("Chat", ChatSchema);
 
-module.exports = Project;
+module.exports = Chat;

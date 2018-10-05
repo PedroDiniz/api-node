@@ -1,10 +1,6 @@
 const express = require("express");
 const Chat = require("../models/chat");
 var app = express();
-var http = require("http").createServer(app);
-var io = require("socket.io")(http);
-
-var io = require("socket.io").listen(server);
 
 // LIST
 exports.list = async function(req, res) {
@@ -25,10 +21,6 @@ exports.getChats = async function(req, res) {
       "messages.userId"
     ]);
 
-    socket.emit("chats", {
-      chats: chat
-    });
-
     return res.send({ chat });
   } catch (err) {
     return res.status(400).send({ error: "Error loading chat" });
@@ -38,7 +30,7 @@ exports.getChats = async function(req, res) {
 // GET MESSAGES FROM CHAT
 exports.getMessages = async function(req, res) {
   try {
-    const chat = await Chat.findOne({ users: req.params.user }).populate([
+    const chat = await Chat.findOne({ users: req.params.userId }).sort(updatedAt).populate([
       "users",
       "messages.userId"
     ]);
