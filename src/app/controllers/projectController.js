@@ -21,16 +21,26 @@ exports.listById = async function(req, res) {
       "tasks"
     ]);
 
-    return res.send({ project });
+    return res.status(200).send({ project });
   } catch (err) {
     return res.status(400).send({ error: "Error loading project" });
   }
 };
 
 // CREATE
-exports.create = async function(req, res) {
+exports.create = async function(req, res, next) {
   try {
     const { title, description, tasks } = req.body;
+
+    if (!title) {
+      res.status(422).send({ error: "Please insert an title." });
+      return next();
+    }
+
+    if (!description) {
+      res.status(422).send({ error: "Please insert an description." });
+      return next();
+    }
 
     const project = await Project.create({
       title,
@@ -50,7 +60,7 @@ exports.create = async function(req, res) {
 
     await project.save();
 
-    return res.send({ project });
+    return res.status(200).send({ project });
   } catch (err) {
     return res.status(400).send({ error: "Error creating new project" });
   }
@@ -85,7 +95,7 @@ exports.update = async function(req, res) {
 
     await project.save();
 
-    return res.send({ project });
+    return res.status(200).send({ project });
   } catch (err) {
     return res.status(400).send({ error: "Error updating project" });
   }
@@ -96,7 +106,7 @@ exports.delete = async function(req, res) {
   try {
     const project = await Project.findByIdAndRemove(req.params.projectId);
 
-    return res.send({ project });
+    return res.status(200).send({ project });
   } catch (err) {
     return res.status(400).send({ error: "Error loading project" });
   }

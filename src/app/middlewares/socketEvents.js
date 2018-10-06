@@ -1,25 +1,33 @@
+const chatController = require("../controllers/chatControllerSocket");
+
 module.exports = function(io) {
   // Set socket.io listeners.
   io.on("connection", socket => {
     // console.log('a user connected');
 
-    // On conversation entry, join broadcast channel
-    socket.on("enter conversation", conversation => {
-      socket.join(conversation);
-      // console.log('joined ' + conversation);
+    socket.on("getChats", userId => {
+      const chats = chatController.getChats(userId);
+
+      socket.emit("chats", {
+        chats
+      });
+
+      //socket.join em todas as salas(id)?
+      for (chat in chats) {
+        socket.join(chat);
+      }
     });
 
-    socket.on("leave conversation", conversation => {
-      socket.leave(conversation);
-      // console.log('left ' + conversation);
+    socket.on("newMessage", author, user, messages => {
+      const message = chatController.sendMessage(author, user, messages);
+
+      io.in(message.conversationId).emit("message created", message.messages);
     });
 
-    socket.on("new message", conversation => {
-      io.sockets.in(conversation).emit("refresh messages", conversation);
-    });
+    socket.on("createChat", author, user, messages => {
+      const message = chatController.sendMessage(author, user, messages);
 
-    socket.on("disconnect", () => {
-      // console.log('user disconnected');
+      io.in(message.conversationId).emit("message created", message.messages);
     });
   });
 };

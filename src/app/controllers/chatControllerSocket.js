@@ -3,40 +3,33 @@ const Chat = require("../models/chat");
 const Message = require("../models/message");
 
 //GET ALL CHATS THAT YOU PARTICIPATE
-exports.getChats = async function(req, res) {
+exports.getChats = async function(users) {
   try {
-    const chats = await Chat.find({ users: req.params.userId }).populate([
-      "users",
-      "messages"
-    ]);
+    const chats = await Chat.find({ users }).populate(["users", "messages"]);
 
     if (!chats) {
-      return res.send({ error: "Error loading chat..." });
+      return { error: "Error loading chat..." };
     } else {
-      return res.status(200).send({ chats });
+      return chats;
     }
   } catch (err) {
-    return res.status(400).send({ error: "Error loading chat" });
+    return { error: "Error loading chat" };
   }
 };
 
 // CREATE
-exports.create = async function(req, res, next) {
+exports.create = async function(author, user, messages) {
   try {
-    const { author, user, messages } = req.body;
-
     const users = [author, user];
 
     const users2 = [user, author];
 
     if (!users) {
-      res.status(422).send({ error: "Please select an user." });
-      return next();
+      return { error: "Please select an user." };
     }
 
     if (!messages) {
-      res.status(422).send({ error: "Please enter a message." });
-      return next();
+      return { error: "Please enter a message." };
     }
 
     const chat = await Chat.findOne({ users: users, users: users2 }).populate([
@@ -59,27 +52,21 @@ exports.create = async function(req, res, next) {
 
         await chat.save();
 
-        return res.status(200).send({ message: "Conversation started!" });
+        return message;
       } else {
-        return res
-          .status(400)
-          .send({ error: "Error on creating conversation!" });
+        return { error: "Error on creating conversation!" };
       }
     } else {
-      return res
-        .status(400)
-        .send({ error: "Error creating new chat, chat already exist" });
+      return { error: "Error creating new chat, chat already exist" };
     }
   } catch (err) {
-    return res.status(400).send({ error: "Error creating new chat" });
+    return { error: "Error creating new chat" };
   }
 };
 
 // SEND MESSAGE
-exports.sendMessage = async function(req, res) {
+exports.sendMessage = async function(author, user, messages) {
   try {
-    const { author, user, messages } = req.body;
-
     const users = [author, user];
     const users2 = [user, author];
 
@@ -99,14 +86,12 @@ exports.sendMessage = async function(req, res) {
 
       await chat.save();
     } else {
-      return res
-        .status(400)
-        .send({ error: "Error creating new message, chat doesnt exists" });
+      return { error: "Error creating new message, chat doesnt exists" };
       //create(author, user, messages);
     }
 
-    return res.status(200).send({ message: "Conversation updated!" });
+    return message;
   } catch (err) {
-    return res.status(400).send({ error: "Error creating new message" });
+    return { error: "Error creating new message" };
   }
 };
