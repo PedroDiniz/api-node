@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const socketEvents = require("./app/middlewares/socketEvents");
+const socketEvents = require("../app/middlewares/socketEvents");
 const app = express();
 
 app.use(bodyParser.json());
@@ -14,4 +14,3 @@ const io = require("socket.io").listen(server);
 socketEvents(io);
 
 module.exports = app;
-

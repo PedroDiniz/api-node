@@ -2,35 +2,18 @@ const express = require("express");
 const Chat = require("../models/chat");
 const Message = require("../models/message");
 
-
 //GET ALL CHATS THAT YOU PARTICIPATE
 exports.getChats = async function(req, res) {
   try {
     const chats = await Chat.find({ users: req.params.userId }).populate([
       "users",
-      "messages.userId"
+      "messages"
     ]);
 
     if (!chats) {
       return res.send({ error: "Error loading chat..." });
     } else {
-      const fullChats = [];
-      chats.forEach(conversation => {
-        Message.find({ conversationId: conversation._id })
-          .sort("-createdAt")
-          .limit(1)
-          .populate(["userId", "conversationId"])
-          .exec((err, message) => {
-            if (err) {
-              res.send({ error: err });
-              return next(err);
-            }
-            fullChats.push(message);
-            if (fullChats.length === chats.length) {
-              return res.status(200).json({ conversations: fullChats });
-            }
-          });
-      });
+      return res.status(200).send({ chats });
     }
   } catch (err) {
     return res.status(400).send({ error: "Error loading chat" });
@@ -44,6 +27,8 @@ exports.create = async function(req, res, next) {
 
     const users = [author, user];
 
+    const users2 = [user, author];
+
     if (!users) {
       res.status(422).send({ error: "Please select an user." });
       return next();
@@ -54,23 +39,32 @@ exports.create = async function(req, res, next) {
       return next();
     }
 
-    const chat = await Chat.findOne({ users: users }).populate([
+    const chat = await Chat.findOne({ users: users, users: users2 }).populate([
       "users",
-      "messages.userId"
+      "messages"
     ]);
     if (!chat) {
       const chat = await Chat.create({
         users,
         createdAt: Date.now()
-      }).then(chat => {
+      });
+      if (chat) {
         const message = await Message.create({
           message: messages,
           userId: author,
           conversationId: chat._id
-        })
+        });
 
-        return res.status(200).send({ message: 'Conversation started!'});
-        });  
+        chat.messages.push(message._id);
+
+        await chat.save();
+
+        return res.status(200).send({ message: "Conversation started!" });
+      } else {
+        return res
+          .status(400)
+          .send({ message: "Error on creating conversation!" });
+      }
     } else {
       return res
         .status(400)
@@ -87,27 +81,32 @@ exports.sendMessage = async function(req, res) {
     const { author, user, messages } = req.body;
 
     const users = [author, user];
+    const users2 = [user, author];
 
-    const chat = await Chat.findOne({ users: users }).populate([
+    const chat = await Chat.findOne({ users: users, users: users2 }).populate([
       "users",
-      "messages.userId"
+      "messages"
     ]);
 
-    if(chat){
+    if (chat) {
       const message = await Message.create({
         message: messages,
         userId: author,
         conversationId: chat._id
-      })
-    } else{
-      create(author, user, messages);
+      });
+
+      chat.messages.push(message._id);
+
+      await chat.save();
+    } else {
+      return res
+        .status(400)
+        .send({ error: "Error creating new message, chat doesnt exists" });
+      //create(author, user, messages);
     }
 
-
-    return res.status(200).send({ message: 'Conversation updated!'});
-   
+    return res.status(200).send({ message: "Conversation updated!" });
   } catch (err) {
-    return res.status(400).send({ error: "Error creating new chat" });
+    return res.status(400).send({ error: "Error creating new message" });
   }
 };
-

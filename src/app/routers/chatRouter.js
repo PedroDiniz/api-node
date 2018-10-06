@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/getChats/:userId", chatController.getChats);
 
-router.post("/createChat", chatController.createChat);
+router.post("/createChat", chatController.create);
 
 router.post("/sendMessage", chatController.sendMessage);
 
