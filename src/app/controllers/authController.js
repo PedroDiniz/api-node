@@ -17,13 +17,13 @@ function generateToken(params = {}) {
 
 // rota para registrar usuario
 exports.signup = async function(req, res) {
-  const { email } = req.body;
+  const { email, password } = req.body;
 
   try {
     if (await User.findOne({ email }))
       return res.status(400).send({ error: "User already exists" });
 
-    const user = await User.create(req.body);
+    const user = await User.create({ email, password });
 
     user.password = undefined;
 
